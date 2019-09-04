@@ -1,0 +1,58 @@
+<! DOCTYPE html><html>
+<head><title>DCORPascalMod</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"> <meta charset="utf-8">
+	<body style="padding-top:15%">
+	<div id="board"> </div>
+	<input type="text" id="sequence" placeholder="Enter Binary Sequence" /><br />
+	<button onclick="doAll()"> Do PascalMod</button>
+	<script>
+
+function doMod2(inpVal){
+var Len= inpVal.length-1;
+var Arr=[];
+Arr[0]=inpVal;
+
+for(a=1;a<=Len;a++){
+Arr[a]=func(Arr[a-1]);
+
+}
+return Arr.join("<br />");
+}
+function func(setSeq){
+var ac; var ans=[];
+setSeq=setSeq.split("");
+
+var ab= setSeq.length-2;
+for(b=0;b<=ab;b++){
+ac=eval((setSeq[b]*1)+(setSeq[b+1]*1));
+if(ac>1){ans[b]=0;}
+else{ans[b]=ac; }
+
+}
+ans=ans.join("");
+return ans;
+}
+
+var strAll="";
+function doAll(){
+var inp= document.getElementById("sequence").value;
+if(!isNaN(inp)){
+strAll+="<font style=\"background-color:green;color:white; font-weight:bold;\" >input:: "+inp+"</font><br />"+doMod2(inp)+"<hr />";
+document.getElementById("board"). innerHTML="<center>"+strAll+"</center>";
+
+}
+else{alert("It's like the  input sequence you entered is not a number\n Please check and try again"); }
+}
+
+
+
+
+
+
+
+	</script>
+</body>
+
+
+
+</html>
