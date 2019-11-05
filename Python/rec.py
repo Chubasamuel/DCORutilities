@@ -31,7 +31,9 @@ except (FileNotFoundError,OSError) as e:
         err("Error while trying to create data storage file. May be some file permission issues! So check your settings");
         sys.exit();
 with open("rec.dt","rb") as f:
+    global recordRead
     recordRead=base64.b64decode(f.read()).decode("utf-8","ignore");
+    global recData
     recData=ast.literal_eval(recordRead);
 def pMark(a):
     if(float(a)>=50):
@@ -113,53 +115,76 @@ def dumpQ(quiz):
                 if(quiz==nb):
                     print(quiz.capitalize()," ---- ",pMark(k[i][quiz]));
         print("-"*sep,"\n");
-def pMode():
-    global mode 
-    mode=input("Enter mode of operation,\"\33[96m \33[1m dump \033[m\" to view previously saved data, \"\33[96m \33[1m aqn \033[m\" to add new data\nOr  Enter \"\33[91m exit \033[m\" to exit program\n\n").lower();
-    if mode=='exit':
-        print("Program exited")
-        sys.exit();
-    if(not mode in comList):
-        err("\n Command not recognised\n Enter a valid command\n")
-        pMode();
-    else:
-       # print("command exists")
-       """"""
-pMode();
 
-def aqnInp():
-    aqnData=input("Enter new data in format \"\33[96m name:title:value \033[m\" e.g chuba:pharmac1:65\n\n").lower();
-    if(aqnData=="exit"):
-        err("Program exited");
-        sys.exit();
+def aqnInpHelper(aqnData):
     aqnData=aqnData.split(":");
     with open("rec.dt","rb") as f:
-        recRead=base64.b64decode(f.read()).decode("utf-8","ignore");
-        rec=ast.literal_eval(recRead);
+        rec=globals()['recData'];
         if aqnData[0] in rec:
             if not aqnData[1] in rec[aqnData[0]]:
                 rec[aqnData[0]][aqnData[1]]=aqnData[2];
+                globals()['recData']=rec
             else:
                 err("Data "+str(aqnData[1])+" for "+str(aqnData[0]).capitalize()+" already exists\n New entry not saved.");
                 sys.exit();
         else:
             rec[aqnData[0]]={};
-            rec[aqnData[0]][aqnData[1]]=aqnData[2]
+            rec[aqnData[0]][aqnData[1]]=aqnData[2];
+            globals()['recData']=rec;
         f.close();
         f=open("rec.dt","wb");
         f.write(base64.b64encode(bytes(str(rec),"utf-8"))); 
         f.close();
         succ("Data added successfully");
-        aqnInp();
+def aqnInpHelper2(aqnData):
+    aqnInpHelper(aqnData);
+    aqnInp();
+def aqnInp():
+    aqnData=input("Enter new data in format \"\33[96m name:title:value \033[m\" e.g chuba:pharmac1:65\n\n"+cend).lower().strip();
+    if(aqnData=="exit"):
+        err("Program exited");
+        sys.exit();
+    elif(aqnData=="back"):
+        pMode();
+    else:
+        if("-m" in aqnData.split() and len(recData)>0):
+            try:
+                aqnDataM=aqnData.split()[1];
+            except IndexError:
+                aqnDataM=input("Enter new data title>").lower().strip();
+            for name in recData:
+               aqnDat= input(name+">>"+aqnDataM+">>");
+               aqnData=name+":"+aqnDataM+":"+aqnDat;
+               if(aqnDat=="pass"):
+                   continue;
+               else:
+                   aqnInpHelper(aqnData);
+            aqnInp();
 
+        elif("-mn" in aqnData.split() or len(recData)<1):
+            try:
+                aqnDataM=aqnData.split()[1];
+            except IndexError:
+                aqnDataM=input("Enter new data title>>").lower().strip();
+            while True:
+                aqnDat= input("Input in format \'name:score\'>>");
+                if(aqnDat=="done"):
+                    break;
+                aqnData=aqnDat.split(":")[0]+":"+aqnDataM+":"+aqnDat.split(":")[1];
+                aqnInpHelper(aqnData);
+            aqnInp();
+        else:
+            aqnInpHelper2(aqnData);
 
 def dumpFunc():
-    dMode=input("\nEnter dump arg e.g formats below::\n\ntitle\nname\nall\nname#title\nname#title,title,title\nname,name#title,title,title,title\nname,name,name,name#title\n OR \" "+cred+"exit"+cend+"\" to exit\n\n" ).lower();
+    dMode=input("\nEnter dump arg e.g formats below::\n\ntitle\nname\nall\nname#title\nname#title,title,title\nname,name#title,title,title,title\nname,name,name,name#title\n OR \" "+cred+"exit"+cend+"\" to exit\n\n" ).lower().strip();
     if(dMode=="exit"):
         err("Program exited");
         sys.exit();
+    if(dMode=="back"):
+        pMode();
 
-    if(dMode=="all"):
+    elif(dMode=="all"):
         dumpAll();
         succ("Full data dumped");
         dumpFunc();
@@ -205,9 +230,20 @@ with open('rec.dt','r+') as f:
         f.close();
         sys.exit();
     f.close();
-if(mode=="dump"):
-    dumpFunc();
-elif(mode=="aqn" and progRun==True):
-    aqnInp();
-else:
-    err("Operation failed!");
+
+def pMode():
+    global mode 
+    mode=input("Enter mode of operation,\"\33[96m \33[1m dump \033[m\" to view previously saved data, \"\33[96m \33[1m aqn \033[m\" to add new data\nOr  Enter \"\33[91m exit \033[m\" to exit program\n\n").lower().strip();
+    if mode=='exit':
+        err("Program exited")
+        sys.exit();
+    if(not mode in comList):
+        err("\n Command not recognised\n Enter a valid command\n")
+        pMode();
+    if(mode=="dump"):
+        dumpFunc();
+    elif(mode=="aqn" and progRun==True):
+        aqnInp();
+    else:
+        err("Operation failed!>>>Unknown error");
+pMode();
