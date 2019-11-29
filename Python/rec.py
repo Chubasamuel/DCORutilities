@@ -100,6 +100,20 @@ def dumpManyN(aq,ar):
                 print(r.capitalize()," ---- ",pMark(k[i][r]));
         print("-"*sep);
 
+def dumpRegEx(regex):
+    k=recData;
+    sep="-"
+    print("\n\n")
+    for i in k:
+        for b in k[i]:
+            if(re.search(regex,b)):
+                sep=len(b+" "+" ---- "+str(k[i][b]))+3;
+        print(ccyan+cbold+i.capitalize()+cend);
+        print("-"*sep)
+        for nb in k[i]:
+            if(re.search(regex,nb)):
+                print(nb.capitalize()," ---- ",pMark(k[i][nb]));
+        print("-"*sep,"\n")
 def dumpQ(quiz):
     k=recData;
     print("\n\n");
@@ -188,7 +202,13 @@ def dumpFunc():
         dumpAll();
         succ("Full data dumped");
         dumpFunc();
-    
+    elif(re.search("-rx",dMode)):
+        yy=dMode.split();
+        if(yy[0]=="-rx"):
+            dumpRegEx(yy[1])
+        else:
+            dumpRegEx(yy[0])
+        dumpFunc()
     elif(dMode.split("#")[0].split(",")[0] in recData and re.search(r"^[\,a-z]+#[\,a-z0-9]+$",dMode)):
         yy=dMode.split("#");
         dumpManyN(yy[0],yy[1]);
