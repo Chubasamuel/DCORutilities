@@ -18,9 +18,6 @@ with open(base_path+"/config.json", "r") as f:
     config = json.load(f)
 
 
-#fromDate = input("Enter start date in format dd-mm-yyyy\n\t")
-#toDate = input("Enter end date in format dd-mm-yyyy\n\t")
-
 indexes={"date":0,"purpose":1,"income":2,"expense":3,"category":4,"description":5}
 
 def invCategOrPurp(categOrPurpM,isCateg,inc, dd,mm,yy,dd2,mm2,yy2):
@@ -30,7 +27,7 @@ def invCategOrPurp(categOrPurpM,isCateg,inc, dd,mm,yy,dd2,mm2,yy2):
     if(len(ccCategP)>1 and ccCategP[1].strip()=="m"):
         shouldMergeKey=True
     
-    res = {}
+    res = {"c_o_u_n_t":{}}
     incOrExp=2
     catOrP=1
     if isCateg:
@@ -67,13 +64,22 @@ def invCategOrPurp(categOrPurpM,isCateg,inc, dd,mm,yy,dd2,mm2,yy2):
 def putOrUp(dic,key,val):
     if key in dic:
         dic[key]+=val
+        dic["c_o_u_n_t"][key]+=1
     else:
         dic[key]=val
+        dic["c_o_u_n_t"][key]=1
+
 def withinDate(cD,cM,cY,dd,mm,yy,dd2,mm2,yy2):
     t=dt(cY,cM,cD).timestamp()
     t1=dt(yy,mm,dd).timestamp()
     t2=dt(yy2,mm2,dd2).timestamp()
     return t>=t1 and t<=t2
+def printL(res):
+    for k in res:
+        if(k=="c_o_u_n_t"):
+            print("{'c_o_u_n_t': ",res["c_o_u_n_t"],sep="", end="")
+        else:
+            print(", '",k,"': ",green,res[k],cend,"}", sep="")
 for c in config:
     d,m,y=[int(i) for i in c["start"].split("-")]
     d2,m2,y2=[int(i) for i in c["end"].split("-")]
@@ -83,42 +89,10 @@ for c in config:
     res = [invCategOrPurp(i.strip(),isCateg,isInc, d,m,y,d2,m2,y2) for i in params]
     print(bold,green,"from: ",cend,c["start"])
     print(bold,green,"to: ",cend, c["end"])
-    print(bold,res,cend)
+    for r in res:
+        print(cyan,bold,"-- ",cend,end="")
+        print(bold,end="",)
+        printL(r)
+        print(cend)
     print("\n\n")
 
-"""isCateg=True
-isInc=False
-while True:
-    inp=input("Is it a category? (Y/N)\t")
-    if inp.lower() =="y":
-        isCateg=True
-        break
-    elif inp.lower()=="n":
-        isCateg=False
-        break
-    else:
-        continue
-while True:
-    inp=input("Is it an income? (Y/N)\t")
-    if inp.lower() =="y":
-        isInc=True
-        break
-    elif inp.lower()=="n":
-        isInc=False
-        break
-    else:
-        continue
-catOrP=input("Enter names of category or purpose separated by comma:\n\t")
-catOrP=catOrP.split(",")"""
-
-"""inv=["airtime","data","water"]
-for i in inv:
-    print(invCategOrPurp(i,isCateg,isInc))
-"""
-
-"""inv = ["feed","food"]
-for i in inv:
-    print(invCategOrPurp(i,isCateg,isInc))"""
-
-"""for c in catOrP:
-    print(invCategOrPurp(c.strip(),isCateg,isInc))"""
